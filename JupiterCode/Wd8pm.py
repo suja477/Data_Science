@@ -36,3 +36,40 @@ def replacer(df):
     for i in con:
         x=df[i].mean()
         df[i]=df[i].fillna(x)
+        
+def preprocessing(df):
+    from Wd8pm import catcon,standardize
+    import pandas as pd
+    cat,con = catcon(df)
+    X1 = standardize(df)
+    X2 = pd.get_dummies(df[cat])
+    Xnew = X1.join(X2)
+    return Xnew
+
+def regression(mob,xtrain,xtest,ytrain,ytest):
+    from sklearn.linear_model import LinearRegression
+    model = mob.fit(xtrain,ytrain)
+    tr_pred = model.predict(xtrain)
+    ts_pred = model.predict(xtest)
+    from sklearn.metrics import mean_absolute_error,explained_variance_score
+    adj = explained_variance_score(ytest,ts_pred)
+    bias = mean_absolute_error(ytrain,tr_pred)
+    var = mean_absolute_error(ytest,ts_pred)
+    return adj,bias,var
+        
+def anova(A,B,df):
+    from statsmodels.formula.api import ols
+    model = ols(A +" ~ "+ B,df).fit()
+
+    from statsmodels.stats.anova import anova_lm
+    Q=anova_lm(model)
+    return Q
+
+def backward_elim(Xnew,Y):
+    from sklearn.model_selection import train_test_split
+    xtrain,xtest,ytrain,ytest=train_test_split(Xnew,Y,test_size=0.2,random_state=41)
+    from statsmodels.api import add_constant
+    xconst=add_constant(xtrain)
+    from statsmodels.api import OLS
+    q=OLS(ytrain,xconst).fit()    
+    return q
