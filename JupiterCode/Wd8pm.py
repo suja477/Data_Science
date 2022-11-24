@@ -57,13 +57,20 @@ def regression(mob,xtrain,xtest,ytrain,ytest):
     var = mean_absolute_error(ytest,ts_pred)
     return adj,bias,var
         
-def anova(A,B,df):
+def ANOVA(df,cat,con):
     from statsmodels.formula.api import ols
-    model = ols(A +" ~ "+ B,df).fit()
-
+    eqn = str(con) + " ~ " + str(cat)
+    model = ols(eqn,df).fit()
     from statsmodels.stats.anova import anova_lm
-    Q=anova_lm(model)
-    return Q
+    Q = anova_lm(model)
+    return round(Q.iloc[0:1,4:5].values[0][0],5)
+
+def chisq(df,cat1,cat2):
+    import pandas as pd
+    from scipy.stats import chi2_contingency
+    ct = pd.crosstab(df[cat1],df[cat2])
+    a,b,c,d = chi2_contingency(ct)
+    return round(b,5)
 
 def backward_elim(Xnew,Y):
     from sklearn.model_selection import train_test_split
