@@ -80,3 +80,18 @@ def backward_elim(Xnew,Y):
     from statsmodels.api import OLS
     q=OLS(ytrain,xconst).fit()    
     return q
+
+def prep_NN(X,Y):
+    from warnings import filterwarnings
+    filterwarnings("ignore")
+    from Wd8pm import catcon
+    import pandas as pd
+    from sklearn.preprocessing import LabelEncoder,MinMaxScaler
+    le = LabelEncoder()
+    Ynew = pd.DataFrame(le.fit_transform(Y),columns=Y.columns)
+    cat,con = catcon(X)
+    mm = MinMaxScaler()
+    X1 = pd.DataFrame(mm.fit_transform(X[con]),columns=con)
+    X2 = pd.get_dummies(X[cat])
+    Xnew = X1.join(X2)
+    return Xnew,Ynew
